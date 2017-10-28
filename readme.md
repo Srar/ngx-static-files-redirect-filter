@@ -51,8 +51,8 @@ server {
       # static_redirect_base64_host off;				
       # 是否将重写的url path base64编码 默认:off
       # static_redirect_base64_url  off;				
-      # 域名与url path之间的分割符号
-      # static_redirect_split_tag "/";					
+      # 域名与url path之间的分割符号    默认: ""
+      # static_redirect_split_tag "/";					
     }
 }
 ```
