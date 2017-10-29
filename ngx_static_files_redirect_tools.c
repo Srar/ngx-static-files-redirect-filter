@@ -15,7 +15,7 @@ ngx_chain_t* get_test_response(ngx_pool_t* pool) {
 
 ngx_chain_t* get_response_from_ngx_str(ngx_pool_t* pool, ngx_str_t *str) {
     ngx_buf_t *buffer = ngx_create_temp_buf(pool, str -> len);
-    if(buffer == NULL) {
+    if (buffer == NULL) {
         return NULL;
     }
     ngx_memcpy(buffer -> pos, str ->data, str -> len);
@@ -43,7 +43,7 @@ ngx_int_t is_last_chain(ngx_chain_t *chain) {
     ngx_int_t last = 0;
     ngx_chain_t *nchain = chain;
     do {
-        if(nchain -> buf -> last_buf) {
+        if (nchain -> buf -> last_buf) {
             last = 1;
             break;
         }
@@ -76,13 +76,13 @@ ngx_regex_compile_t* generator_regex(ngx_pool_t* pool, ngx_str_t* pattern, ngx_i
     ngx_regex_compile_t *rc = ngx_palloc(pool, sizeof(ngx_regex_compile_t));
     rc -> pattern = *pattern;
     rc -> pool = pool;
-    if(utf8) {
+    if (utf8) {
         rc -> options = PCRE_UTF8 | PCRE_MULTILINE;
     } else {
         rc -> options = PCRE_MULTILINE;
     }
     ngx_int_t compile_result = ngx_regex_compile(rc);
-    if(compile_result != NGX_OK) {
+    if (compile_result != NGX_OK) {
         return NULL;
     }
     return rc;
@@ -93,12 +93,12 @@ ngx_static_redicect_regex_search_result_t* regex_search(ngx_pool_t* pool, ngx_re
     ngx_static_redicect_regex_search_result* elements;
     ngx_static_redicect_regex_search_result_t *response = ngx_palloc(pool, sizeof(ngx_static_redicect_regex_search_result_t));
     ngx_list_t* elements_list = ngx_list_create(pool, 12, sizeof(ngx_static_redicect_regex_search_result));
-    if(elements_list == NULL) return NULL;
+    if (elements_list == NULL) return NULL;
 
     int ovector[30]; 
     int result = 0;
     int regex_exec_offset = 0;
-    while((result = pcre_exec(
+    while ((result = pcre_exec(
         re -> code, re -> extra, 
         (char*)str -> data, str -> len, 
         regex_exec_offset, 
@@ -115,7 +115,7 @@ ngx_static_redicect_regex_search_result_t* regex_search(ngx_pool_t* pool, ngx_re
     }
 
     elements = ngx_palloc(pool, sizeof(ngx_static_redicect_regex_search_result) * elements_count);
-    if(elements_count == 0) {
+    if (elements_count == 0) {
         response -> len = 0;
         response -> array  = elements;
         return response;
@@ -167,11 +167,11 @@ char* substring(ngx_pool_t* pool, char* src, int start, int end) {
 ngx_str_t* ngx_substring(ngx_pool_t* pool, ngx_str_t* str, ngx_int_t start, ngx_int_t end) {
     // printf("start: %d, end: %d, string length: %d\n", (int)start, (int)end, (int)str -> len);
 
-    if(start < 0) return NULL;
-    if(end > (ngx_int_t)str -> len) return NULL;
-    if(start > end) return NULL;
+    if (start < 0) return NULL;
+    if (end > (ngx_int_t)str -> len) return NULL;
+    if (start > end) return NULL;
     ngx_int_t new_length = end - start;
-    if(new_length < 0) return NULL;
+    if (new_length < 0) return NULL;
 
     ngx_str_t *new_str = ngx_palloc(pool, sizeof(ngx_str_t));
     new_str -> len  = new_length;
@@ -182,7 +182,7 @@ ngx_str_t* ngx_substring(ngx_pool_t* pool, ngx_str_t* str, ngx_int_t start, ngx_
 }
 
 ngx_str_t* ngx_append(ngx_pool_t *pool, ngx_str_t* a, ngx_str_t* b) {
-    if(b -> len <= 0) return a;
+    if (b -> len <= 0) return a;
     ngx_str_t *str = ngx_palloc(pool, sizeof(ngx_str_t));
     str -> len  = a -> len + b -> len;
     str -> data = ngx_palloc(pool,  str -> len + 1);
@@ -213,13 +213,13 @@ void add_str_to_last_of_chain(ngx_pool_t *pool, ngx_chain_t *chain, char* str, n
 
 void add_buf_to_last_of_chain(ngx_pool_t *pool, ngx_chain_t *chain, ngx_buf_t *buf) {
     ngx_chain_t *c = chain;
-    if(c -> buf == NULL) {
+    if (c -> buf == NULL) {
         c -> buf = buf;
         return;
     }
 
     while(true) {
-        if(c -> next == NULL) break;
+        if (c -> next == NULL) break;
         c = c -> next;
     }
 

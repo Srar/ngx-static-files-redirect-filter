@@ -22,8 +22,8 @@ ngx_str_t *ramdom_host(ngx_pool_t *pool, ngx_str_t *host) {
     new_host -> data = ngx_palloc(pool, new_host -> len + 1);
     ngx_memcpy(new_host -> data, host -> data, new_host -> len);
     new_host -> data[new_host -> len] = '\0';
-    for(size_t i = 0; i < new_host -> len; i++) {
-        if(new_host -> data[i] == '$') {
+    for (size_t i = 0; i < new_host -> len; i++) {
+        if (new_host -> data[i] == '$') {
             new_host -> data[i] = (rand() % 5) + 48;
         }
     }
@@ -40,11 +40,11 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     context = ngx_http_get_module_ctx(r, module);
     config = ngx_http_get_module_loc_conf(r, module);
     
-    if(!context -> enable) return next(r, in);
+    if (context -> enable == 0) return next(r, in);
     if (in == NULL) return next(r, in);
 
     ngx_chain_add_copy(r -> pool, &context -> html_chain, in);
-    if(is_last_chain(in) != 1) return NGX_OK;
+    if (is_last_chain(in) != 1) return NGX_OK;
 
     /* 将多个chain内的buffer全部合并成一个u_char */
     ngx_str_t *html = link_chains(r -> pool, context -> html_chain);
@@ -56,61 +56,59 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     ngx_int_t redicecting_array_len = 0;
     ngx_static_redicect_render_item* redicecting_array = NULL;
 
-    if(context -> is_html) {
-        ngx_static_redicect_regex_search_result_t *tags_array = regex_search(r -> pool, config -> html_regex -> regex, html);
-        redicecting_array = ngx_palloc(r -> pool, sizeof(ngx_static_redicect_render_item) * tags_array -> len);
-        for(int i = 0; i < tags_array -> len; i++) {
-            ngx_static_redicect_regex_search_result *tag = &tags_array -> array[i];    
-            ngx_static_redicect_regex_search_result *property_url = search_html_tag_property(r -> pool, tag -> str, create_ngx_string(r -> pool, "src"));
-            if(property_url == NULL) 
-                property_url = search_html_tag_property(r -> pool, tag -> str, create_ngx_string(r -> pool, "href"));
-            if(property_url == NULL) continue;
-            ngx_str_t *result = redirect_static_file(
-                r -> pool, 
-                r -> http_connection -> ssl, 
-                &r -> headers_in.host -> value, uri, property_url -> str);
+    ngx_static_redicect_regex_search_result_t *tags_array = regex_search(r -> pool, config -> html_regex -> regex, html);
+    redicecting_array = ngx_palloc(r -> pool, sizeof(ngx_static_redicect_render_item) * tags_array -> len);
+    for (int i = 0; i < tags_array -> len; i++) {
+        ngx_static_redicect_regex_search_result *tag = &tags_array -> array[i];    
+        ngx_static_redicect_regex_search_result *property_url = search_html_tag_property(r -> pool, tag -> str, create_ngx_string(r -> pool, "src"));
+        if (property_url == NULL) 
+            property_url = search_html_tag_property(r -> pool, tag -> str, create_ngx_string(r -> pool, "href"));
+        if (property_url == NULL) continue;
+        ngx_str_t *result = redirect_static_file(
+            r -> pool, 
+            r -> http_connection -> ssl, 
+            &r -> headers_in.host -> value, uri, property_url -> str);
 
-            if(result == NULL) continue;
-                
-            if(ngx_regex_exec(config -> file_extension_regex -> regex, result, NULL, 0) == NGX_REGEX_NO_MATCHED) continue;
+        if (result == NULL) continue;
+            
+        if (ngx_regex_exec(config -> file_extension_regex -> regex, result, NULL, 0) == NGX_REGEX_NO_MATCHED) continue;
 
-            ngx_str_t *url = ramdom_host(r -> pool, &config -> new_host);
+        ngx_str_t *url = ramdom_host(r -> pool, &config -> new_host);
 
-            if(config -> take_src_host == 1) {
-                ngx_str_t *src_host = NULL;
-                if(config -> base64_src_host == 1) {
-                    src_host = ngx_palloc(r -> pool, sizeof(ngx_str_t));
-                    src_host -> len  = 0;
-                    src_host -> data = ngx_palloc(r -> pool, ngx_base64_encoded_length(r -> headers_in.host -> value.len)); 
-                    ngx_encode_base64url(src_host, &r -> headers_in.host -> value); 
-                } else {
-                    src_host = &r -> headers_in.host -> value;
-                }
-                url = ngx_append(r -> pool, url, src_host);
-            }
-
-            url = ngx_append(r -> pool, url, &config -> split_tag);
-
-            if(config -> base64_src_url == 1) {
-                ngx_str_t * base64_url = ngx_palloc(r -> pool, sizeof(ngx_str_t));
-                base64_url -> len  = 0;
-                base64_url -> data = ngx_palloc(r -> pool, ngx_base64_encoded_length(result -> len)); 
-                ngx_encode_base64url(base64_url, result);   
-                url = ngx_append(r -> pool, url, base64_url);
+        if (config -> take_src_host == 1) {
+            ngx_str_t *src_host = NULL;
+            if (config -> base64_src_host == 1) {
+                src_host = ngx_palloc(r -> pool, sizeof(ngx_str_t));
+                src_host -> len  = 0;
+                src_host -> data = ngx_palloc(r -> pool, ngx_base64_encoded_length(r -> headers_in.host -> value.len)); 
+                ngx_encode_base64url(src_host, &r -> headers_in.host -> value); 
             } else {
-                url = ngx_append(r -> pool, url, result);
+                src_host = &r -> headers_in.host -> value;
             }
-
-            redicecting_array[redicecting_array_len].start   = tag -> start + property_url -> start;
-            redicecting_array[redicecting_array_len].end     = tag -> start + property_url -> start + property_url -> str -> len;
-            redicecting_array[redicecting_array_len].length  = redicecting_array[redicecting_array_len].end - redicecting_array[redicecting_array_len].start;
-            redicecting_array[redicecting_array_len].new_url = url;
-
-            // printf("%s\n", (char*)url -> data);
-            redicecting_array_len++;
+            url = ngx_append(r -> pool, url, src_host);
         }
-        // printf("tags: %ld after tags: %ld\n", tags_array -> len, redicecting_array_len);
-    }   
+
+        url = ngx_append(r -> pool, url, &config -> split_tag);
+
+        if (config -> base64_src_url == 1) {
+            ngx_str_t * base64_url = ngx_palloc(r -> pool, sizeof(ngx_str_t));
+            base64_url -> len  = 0;
+            base64_url -> data = ngx_palloc(r -> pool, ngx_base64_encoded_length(result -> len)); 
+            ngx_encode_base64url(base64_url, result);   
+            url = ngx_append(r -> pool, url, base64_url);
+        } else {
+            url = ngx_append(r -> pool, url, result);
+        }
+
+        redicecting_array[redicecting_array_len].start   = tag -> start + property_url -> start;
+        redicecting_array[redicecting_array_len].end     = tag -> start + property_url -> start + property_url -> str -> len;
+        redicecting_array[redicecting_array_len].length  = redicecting_array[redicecting_array_len].end - redicecting_array[redicecting_array_len].start;
+        redicecting_array[redicecting_array_len].new_url = url;
+
+        // printf("%s\n", (char*)url -> data);
+        redicecting_array_len++;
+    }
+    // printf("tags: %ld after tags: %ld\n", tags_array -> len, redicecting_array_len); 
 
     ngx_int_t   render_offset = 0;
     ngx_buf_t   *render_buf   = NULL; 
@@ -118,7 +116,7 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     render_chain -> buf  = NULL;
     render_chain -> next = NULL;
 
-    for(ngx_int_t i = 0; i < redicecting_array_len; i++) {
+    for (ngx_int_t i = 0; i < redicecting_array_len; i++) {
         ngx_static_redicect_render_item item = redicecting_array[i];
         render_buf = ngx_create_temp_buf(r -> pool, item.start - render_offset);
         render_buf -> pos    = html -> data + render_offset;
@@ -126,7 +124,7 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
         add_buf_to_last_of_chain(r -> pool, render_chain, render_buf);
         render_offset = item.end;
         add_str_to_last_of_chain(r -> pool, render_chain, (char*)item.new_url -> data, 0, item.new_url -> len, false);
-        if(i + 1 == redicecting_array_len) {
+        if (i + 1 == redicecting_array_len) {
             render_buf = ngx_create_temp_buf(r -> pool, html -> len - item.end);
             render_buf -> pos    = html -> data + item.start;
             render_buf -> last   = html -> data + html -> len;
