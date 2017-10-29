@@ -8,10 +8,11 @@
 #define _NGX_STATIC_REDIRECT_CONFIG_INCLUDE_
 
 typedef struct {
-    ngx_str_t  host;
+    ngx_str_t  new_host;
     ngx_str_t  split_tag;
-    ngx_flag_t base64_host;
-    ngx_flag_t base64_url;
+    ngx_flag_t take_src_host;
+    ngx_flag_t base64_src_host;
+    ngx_flag_t base64_src_url;
     ngx_flag_t enable;
     ngx_flag_t utf8_content;
 

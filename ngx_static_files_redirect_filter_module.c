@@ -55,11 +55,11 @@ static ngx_command_t commands[] = {
         NULL,
     },
     {
-        ngx_string("static_redirect_host"),
+        ngx_string("static_redirect_new_host"),
         NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
         ngx_conf_set_str_slot,
         NGX_HTTP_LOC_CONF_OFFSET,
-        offsetof(ngx_static_redicect_filter_config, host),
+        offsetof(ngx_static_redicect_filter_config, new_host),
         NULL,
     },
     {
@@ -71,19 +71,27 @@ static ngx_command_t commands[] = {
         NULL,
     },
     {
-        ngx_string("static_redirect_base64_host"),
+        ngx_string("static_redirect_take_src_host"),
         NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
         ngx_conf_set_flag_slot,
         NGX_HTTP_LOC_CONF_OFFSET,
-        offsetof(ngx_static_redicect_filter_config, base64_host),
+        offsetof(ngx_static_redicect_filter_config, take_src_host),
         NULL,
     },
     {
-        ngx_string("static_redirect_base64_url"),
+        ngx_string("static_redirect_base64_src_host"),
         NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
         ngx_conf_set_flag_slot,
         NGX_HTTP_LOC_CONF_OFFSET,
-        offsetof(ngx_static_redicect_filter_config, base64_url),
+        offsetof(ngx_static_redicect_filter_config, base64_src_host),
+        NULL,
+    },
+    {
+        ngx_string("static_redirect_base64_src_url"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_static_redicect_filter_config, base64_src_url),
         NULL,
     },
     ngx_null_command
@@ -110,10 +118,11 @@ static void* on_config_struct_created(ngx_conf_t *config) {
     if(cf == NULL) {
         return NULL;
     }
-    cf -> enable       = NGX_CONF_UNSET;
-    cf -> utf8_content = NGX_CONF_UNSET;
-    cf -> base64_host  = NGX_CONF_UNSET;
-    cf -> base64_url   = NGX_CONF_UNSET;
+    cf -> enable          = NGX_CONF_UNSET;
+    cf -> utf8_content    = NGX_CONF_UNSET;
+    cf -> take_src_host   = NGX_CONF_UNSET;
+    cf -> base64_src_host = NGX_CONF_UNSET;
+    cf -> base64_src_url  = NGX_CONF_UNSET;
     return cf;
 }
 
@@ -121,28 +130,20 @@ static char* on_config_marged(ngx_conf_t *config, void* parent, void* child) {
     ngx_static_redicect_filter_config *p = (ngx_static_redicect_filter_config*)parent;
     ngx_static_redicect_filter_config *c = (ngx_static_redicect_filter_config*)child;
 
-    ngx_conf_merge_str_value(c -> host, p -> host, "");
+    ngx_conf_merge_str_value(c -> new_host, p -> new_host, "");
     ngx_conf_merge_str_value(c -> split_tag, p -> split_tag, "");
     ngx_conf_merge_value(c -> enable, p -> enable, -1);
-    ngx_conf_merge_value(c -> base64_host, p -> base64_host, -1);
-    ngx_conf_merge_value(c -> base64_url, p -> base64_url, -1);
+    ngx_conf_merge_value(c -> take_src_host, p -> take_src_host, 1);
+    ngx_conf_merge_value(c -> base64_src_host, p -> base64_src_host, -1);
+    ngx_conf_merge_value(c -> base64_src_url, p -> base64_src_url, -1);
     ngx_conf_merge_value(c -> utf8_content, p -> utf8_content, 1);
 
-    if(c -> host.len == 4042253880) {
-        c -> host.len = 0;
+    if(c -> new_host.len == 4042253880) {
+        c -> new_host.len = 0;
     }
 
     if(c -> split_tag.len == 4042253880) {
         c -> split_tag.len = 0;
-    }
-
-    ngx_str_t *base64_host = NULL;
-    if(c -> host.len > 0 && c -> base64_host == 1) {
-        base64_host = ngx_palloc(config -> pool, sizeof(ngx_str_t));
-        base64_host -> len  = 0;
-        base64_host -> data = ngx_palloc(config -> pool, ngx_base64_encoded_length(c -> host.len)); 
-        ngx_encode_base64url(base64_host, &c -> host);   
-        c -> host = *base64_host;
     }
 
     if(c -> enable) {

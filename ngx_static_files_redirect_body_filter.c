@@ -16,6 +16,20 @@ typedef struct {
     ngx_str_t *new_url;
 } ngx_static_redicect_render_item; 
 
+ngx_str_t *ramdom_host(ngx_pool_t *pool, ngx_str_t *host) {
+    ngx_str_t * new_host = ngx_palloc(pool, sizeof(ngx_str_t));
+    new_host -> len  = host -> len;
+    new_host -> data = ngx_palloc(pool, new_host -> len + 1);
+    ngx_memcpy(new_host -> data, host -> data, new_host -> len);
+    new_host -> data[new_host -> len] = '\0';
+    for(size_t i = 0; i < new_host -> len; i++) {
+        if(new_host -> data[i] == '$') {
+            new_host -> data[i] = (rand() % 5) + 48;
+        }
+    }
+    return new_host;
+}
+
 ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *in, ngx_int_t (*next)(ngx_http_request_t *r, ngx_chain_t *in)) {
 
     // clock_t begin = clock();
@@ -60,11 +74,24 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
                 
             if(ngx_regex_exec(config -> file_extension_regex -> regex, result, NULL, 0) == NGX_REGEX_NO_MATCHED) continue;
 
-            ngx_str_t *url = create_ngx_string(r -> pool, (char*)config -> host.data);
-            
+            ngx_str_t *url = ramdom_host(r -> pool, &config -> new_host);
+
+            if(config -> take_src_host == 1) {
+                ngx_str_t *src_host = NULL;
+                if(config -> base64_src_host == 1) {
+                    src_host = ngx_palloc(r -> pool, sizeof(ngx_str_t));
+                    src_host -> len  = 0;
+                    src_host -> data = ngx_palloc(r -> pool, ngx_base64_encoded_length(r -> headers_in.host -> value.len)); 
+                    ngx_encode_base64url(src_host, &r -> headers_in.host -> value); 
+                } else {
+                    src_host = &r -> headers_in.host -> value;
+                }
+                url = ngx_append(r -> pool, url, src_host);
+            }
+
             url = ngx_append(r -> pool, url, &config -> split_tag);
 
-            if(config -> base64_url == 1) {
+            if(config -> base64_src_url == 1) {
                 ngx_str_t * base64_url = ngx_palloc(r -> pool, sizeof(ngx_str_t));
                 base64_url -> len  = 0;
                 base64_url -> data = ngx_palloc(r -> pool, ngx_base64_encoded_length(result -> len)); 
