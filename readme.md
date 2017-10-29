@@ -6,7 +6,7 @@
 
 ## 案例
 
-由于目前国内安置网站需要备案, 所以有很多站长选择了使用国外服务器来访网站.
+由于目前国内安置网站需要备案, 所以有很多站长选择了使用国外服务器来放网站.
 不过大部分的国际出口链路属于吃紧状态, 即使使用了BBR或锐速等单边TCP加速软件效果也仅能提供一些效果.
 
 当使用本模块之后, web server仅仅需要返回一个html文件, 其余静态文件列如css, js等您可以选择双边加速转发(kcptun)并缓存至您在境内的未备案(非80端口)的网站上.
@@ -45,8 +45,9 @@ server {
       # 重写URL总开关
       # static_redirect on;                            
 
-      # 重写URL后的域名 字符'$'会被替换为0~5的随机数
-      # static_redirect_new_host "http://example111.com";  
+      # 重写URL后的域名 字符'$'会被替换为0~5的随机数 
+      # 仅提供0~5随机数原因是如果域名都很分散反而会因为DNS解析降低一些访问速度
+      # static_redirect_new_host "http://example111.com"; 
 
       # 是否携带源域名 默认:on
       # static_redirect_take_src_host on;
