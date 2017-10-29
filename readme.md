@@ -39,19 +39,28 @@ server {
     proxy_max_temp_file_size 0;
 
     location / {
-      proxy_set_header Host "example.com";
       proxy_pass http://example.com/;
+      proxy_set_header Host "example.com";
+
       # 重写URL总开关
-      # static_redirect on;                             
-      # 重写URL后的域名
-      # static_redirect_host "http://example111.com";  
+      # static_redirect on;                            
+
+      # 重写URL后的域名 字符'$'会被替换为0~5的随机数
+      # static_redirect_new_host "http://example111.com";  
+
+      # 是否携带源域名 默认:on
+      # static_redirect_take_src_host on;
+
       # 源站返回的内容是否为UTF8内容 默认:on
-      # static_redirect_utf8_content on;			    
-      # 是否将重写的域名base64编码      默认:off
-      # static_redirect_base64_host off;				
-      # 是否将重写的url path base64编码 默认:off
-      # static_redirect_base64_url  off;				
-      # 域名与url path之间的分割符号    默认: ""
+      # static_redirect_utf8_content on;	
+
+      # 是否将源域名base64编码 默认:off
+      # static_redirect_base64_src_host off;		
+
+      # 是否将源url path base64编码 默认:off
+      # static_redirect_base64_src_url  off;		
+
+      # 源域名与源url path之间的分割符号 默认: ""
       # static_redirect_split_tag "/";					
     }
 }
