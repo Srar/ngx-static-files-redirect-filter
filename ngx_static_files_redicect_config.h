@@ -18,6 +18,9 @@ typedef struct {
 
     ngx_int_t buffer_size_limit;
 
+    ngx_int_t ramdom_domain_minmum;
+    ngx_int_t ramdom_domain_maxmum;
+
     ngx_regex_compile_t *html_regex; 
     ngx_regex_compile_t *file_extension_regex; 
 } ngx_static_redicect_filter_config;

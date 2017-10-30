@@ -1,8 +1,6 @@
 # ngx-static-files-redirect-filter
 
-## 概要
-
-本模块可以将当前域下静态文件(css, js, img)重写URL来转发至另一台web服务器请求.
+本模块可以在静态资源较多的网站上将当前域下静态文件(css, js, img)重写URL来转发至另一台web服务器请求.
 
 ## 案例
 
@@ -45,11 +43,13 @@ server {
       # 重写URL总开关
       # static_redirect on;                            
 
-      # 重写URL后的域名 字符'$'会被替换为0~5的随机数 
-      # 仅提供0~5随机数原因是如果域名都很分散反而会因为DNS解析降低一些访问速度
-      # static_redirect_new_host "http://example111.com"; 
+      # 重写URL后的域名 字符'$'会被替换为随机数 支持域名内带有多个'$'字符
+      # static_redirect_new_host "http://example111.com";
+    
+      # 替换为随机数的区间, 值可以为0~9之间 默认: "0 3". 如果该值设置的区间很大可能会因为DNS解析导致速度降低.
+      # static_redirect_new_host_ramdom 0 3
 
-      # 限定最大处理的大小 如果超出该大小则会回退至普通返回 
+      # 限定最大处理的大小 如果超出该大小则会回退至普通返回 默认: 无限制
       # 如果设置该值过大可能会在特定场景导致DOS攻击
       # static_redirect_buffer_size_limit 128k;
 

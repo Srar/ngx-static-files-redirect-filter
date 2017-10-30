@@ -16,7 +16,7 @@ typedef struct {
     ngx_str_t *new_url;
 } ngx_static_redicect_render_item; 
 
-ngx_str_t *ramdom_host(ngx_pool_t *pool, ngx_str_t *host) {
+ngx_str_t *ramdom_host(ngx_pool_t *pool, ngx_str_t *host, ngx_int_t min, ngx_int_t max) {
     ngx_str_t * new_host = ngx_palloc(pool, sizeof(ngx_str_t));
     new_host -> len  = host -> len;
     new_host -> data = ngx_palloc(pool, new_host -> len + 1);
@@ -24,7 +24,7 @@ ngx_str_t *ramdom_host(ngx_pool_t *pool, ngx_str_t *host) {
     new_host -> data[new_host -> len] = '\0';
     for (size_t i = 0; i < new_host -> len; i++) {
         if (new_host -> data[i] == '$') {
-            new_host -> data[i] = (rand() % 5) + 48;
+            new_host -> data[i] = rand() % ((48 + max) + 1 - (48 + min)) + (48 + min);
         }
     }
     return new_host;
@@ -80,7 +80,7 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
             
         if (ngx_regex_exec(config -> file_extension_regex -> regex, result, NULL, 0) == NGX_REGEX_NO_MATCHED) continue;
 
-        ngx_str_t *url = ramdom_host(r -> pool, &config -> new_host);
+        ngx_str_t *url = ramdom_host(r -> pool, &config -> new_host, config -> ramdom_domain_minmum, config -> ramdom_domain_maxmum);
 
         if (config -> take_src_host == 1) {
             ngx_str_t *src_host = NULL;

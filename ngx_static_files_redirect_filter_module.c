@@ -15,6 +15,7 @@
 static ngx_int_t init_filter(ngx_conf_t *config);
 static void* on_config_struct_created(ngx_conf_t *config);
 static char* on_config_marged(ngx_conf_t *config, void* parent, void* child);
+char *ngx_conf_set_host_ramdom(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 static ngx_int_t leading_header_filter(ngx_http_request_t *r);
 static ngx_int_t leading_body_filter(ngx_http_request_t *r, ngx_chain_t *in);
@@ -60,6 +61,14 @@ static ngx_command_t commands[] = {
         ngx_conf_set_str_slot,
         NGX_HTTP_LOC_CONF_OFFSET,
         offsetof(ngx_static_redicect_filter_config, new_host),
+        NULL,
+    },
+    {
+        ngx_string("static_redirect_new_host_ramdom"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE2,
+        ngx_conf_set_host_ramdom,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
         NULL,
     },
     {
@@ -126,12 +135,14 @@ static void* on_config_struct_created(ngx_conf_t *config) {
     if(cf == NULL) {
         return NULL;
     }
-    cf -> enable              = NGX_CONF_UNSET;
-    cf -> utf8_content        = NGX_CONF_UNSET;
-    cf -> take_src_host       = NGX_CONF_UNSET;
-    cf -> base64_src_host     = NGX_CONF_UNSET;
-    cf -> base64_src_url      = NGX_CONF_UNSET;
-    cf -> buffer_size_limit   = NGX_CONF_UNSET;
+    cf -> enable               = NGX_CONF_UNSET;
+    cf -> utf8_content         = NGX_CONF_UNSET;
+    cf -> take_src_host        = NGX_CONF_UNSET;
+    cf -> base64_src_host      = NGX_CONF_UNSET;
+    cf -> base64_src_url       = NGX_CONF_UNSET;
+    cf -> ramdom_domain_minmum = NGX_CONF_UNSET;
+    cf -> ramdom_domain_maxmum = NGX_CONF_UNSET;
+    cf -> buffer_size_limit    = NGX_CONF_UNSET;
     return cf;
 }
 
@@ -145,6 +156,8 @@ static char* on_config_marged(ngx_conf_t *config, void* parent, void* child) {
     ngx_conf_merge_value(c -> take_src_host, p -> take_src_host, 1);
     ngx_conf_merge_value(c -> base64_src_host, p -> base64_src_host, -1);
     ngx_conf_merge_value(c -> base64_src_url, p -> base64_src_url, -1);
+    ngx_conf_merge_value(c -> ramdom_domain_minmum, p -> ramdom_domain_minmum, 0);
+    ngx_conf_merge_value(c -> ramdom_domain_maxmum, p -> ramdom_domain_maxmum, 3);
     ngx_conf_merge_value(c -> buffer_size_limit, p -> buffer_size_limit, -1);
     ngx_conf_merge_value(c -> utf8_content, p -> utf8_content, 1);
 
@@ -166,6 +179,36 @@ static char* on_config_marged(ngx_conf_t *config, void* parent, void* child) {
         }
     }
     
+    return NGX_CONF_OK;
+}
+
+char *ngx_conf_set_host_ramdom(ngx_conf_t *cf, ngx_command_t *cmd, void *conf) {
+    ngx_static_redicect_filter_config *p = conf;
+    ngx_str_t *values = (ngx_str_t *)cf -> args -> elts;
+
+    if(cf -> args -> nelts != 3) {
+        return "错误的参数个数";
+    }
+
+    p -> ramdom_domain_minmum = ngx_atoi(values[1].data, values[1].len);
+    p -> ramdom_domain_maxmum = ngx_atoi(values[2].data, values[2].len);
+
+    if(p -> ramdom_domain_minmum == NGX_ERROR || p -> ramdom_domain_maxmum == NGX_ERROR) {
+        return "错误的参数类型";
+    }
+
+    if(!(p -> ramdom_domain_minmum >= 0 && p -> ramdom_domain_minmum <= 9)) {
+        return "参数的值必须在0~9之间";
+    }
+
+    if(!(p -> ramdom_domain_maxmum >= 0 && p -> ramdom_domain_maxmum <= 9)) {
+        return "参数的值必须在0~9之间";
+    }
+
+    if(p -> ramdom_domain_minmum > p -> ramdom_domain_maxmum) {
+        return "错误的参数类型";
+    }
+
     return NGX_CONF_OK;
 }
 
