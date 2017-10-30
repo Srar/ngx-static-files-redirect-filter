@@ -94,6 +94,14 @@ static ngx_command_t commands[] = {
         offsetof(ngx_static_redicect_filter_config, base64_src_url),
         NULL,
     },
+    {
+        ngx_string("static_redirect_buffer_size_limit"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_static_redicect_filter_config, buffer_size_limit),
+        NULL,
+    },
     ngx_null_command
 };
 
@@ -118,11 +126,12 @@ static void* on_config_struct_created(ngx_conf_t *config) {
     if(cf == NULL) {
         return NULL;
     }
-    cf -> enable          = NGX_CONF_UNSET;
-    cf -> utf8_content    = NGX_CONF_UNSET;
-    cf -> take_src_host   = NGX_CONF_UNSET;
-    cf -> base64_src_host = NGX_CONF_UNSET;
-    cf -> base64_src_url  = NGX_CONF_UNSET;
+    cf -> enable              = NGX_CONF_UNSET;
+    cf -> utf8_content        = NGX_CONF_UNSET;
+    cf -> take_src_host       = NGX_CONF_UNSET;
+    cf -> base64_src_host     = NGX_CONF_UNSET;
+    cf -> base64_src_url      = NGX_CONF_UNSET;
+    cf -> buffer_size_limit   = NGX_CONF_UNSET;
     return cf;
 }
 
@@ -136,6 +145,7 @@ static char* on_config_marged(ngx_conf_t *config, void* parent, void* child) {
     ngx_conf_merge_value(c -> take_src_host, p -> take_src_host, 1);
     ngx_conf_merge_value(c -> base64_src_host, p -> base64_src_host, -1);
     ngx_conf_merge_value(c -> base64_src_url, p -> base64_src_url, -1);
+    ngx_conf_merge_value(c -> buffer_size_limit, p -> buffer_size_limit, -1);
     ngx_conf_merge_value(c -> utf8_content, p -> utf8_content, 1);
 
     if(c -> new_host.len == 4042253880) {

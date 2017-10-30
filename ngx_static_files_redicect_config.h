@@ -16,6 +16,8 @@ typedef struct {
     ngx_flag_t enable;
     ngx_flag_t utf8_content;
 
+    ngx_int_t buffer_size_limit;
+
     ngx_regex_compile_t *html_regex; 
     ngx_regex_compile_t *file_extension_regex; 
 } ngx_static_redicect_filter_config;

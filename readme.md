@@ -49,6 +49,10 @@ server {
       # 仅提供0~5随机数原因是如果域名都很分散反而会因为DNS解析降低一些访问速度
       # static_redirect_new_host "http://example111.com"; 
 
+      # 限定最大处理的大小 如果超出该大小则会回退至普通返回 
+      # 如果设置该值过大可能会在特定场景导致DOS攻击
+      # static_redirect_buffer_size_limit 128k;
+
       # 是否携带源域名 默认:on
       # static_redirect_take_src_host on;
 

@@ -29,8 +29,12 @@ ngx_int_t header_filter(ngx_module_t module, ngx_http_request_t *r, ngx_int_t (*
     }
 
     if (ngx_strstr(r -> headers_out.content_type.data, "text/html") != NULL) {
+        context -> enable = 1;
+        context -> skip_next_chain = 0;
+
+        context -> html_len   = 0;
         context -> html_chain = NULL;
-        context -> enable = true;
+
         r -> filter_need_temporary = 1;
         r -> filter_need_in_memory = 1;
         ngx_http_clear_content_length(r);

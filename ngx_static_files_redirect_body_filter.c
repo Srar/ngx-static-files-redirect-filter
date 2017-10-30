@@ -40,10 +40,17 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     context = ngx_http_get_module_ctx(r, module);
     config = ngx_http_get_module_loc_conf(r, module);
     
-    if (context -> enable == 0) return next(r, in);
+    if (context -> enable == 0 || context -> skip_next_chain == 1) return next(r, in);
     if (in == NULL) return next(r, in);
 
+    context -> html_len += get_size_of_chain(in);
     ngx_chain_add_copy(r -> pool, &context -> html_chain, in);
+
+    if(config -> buffer_size_limit > 0 && context -> html_len > config -> buffer_size_limit) {
+        context -> skip_next_chain = 1;
+        return next(r, context -> html_chain);
+    }
+
     if (is_last_chain(in) != 1) return NGX_OK;
 
     /* 将多个chain内的buffer全部合并成一个u_char */
