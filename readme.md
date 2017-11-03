@@ -65,7 +65,7 @@ server {
       # 是否将源域名base64编码 默认:off
       # static_redirect_base64_src_host off;	
 
-      # 是否将源请求uri base64编码 默认:off
+      # 是否将源请求path base64编码 默认:off
       # static_redirect_base64_src_requesting_path off;		
 
       # 是否将重写的资源uri base64编码 默认:off
