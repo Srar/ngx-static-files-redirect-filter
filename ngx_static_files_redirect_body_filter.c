@@ -133,7 +133,7 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
         add_str_to_last_of_chain(r -> pool, render_chain, (char*)item.new_url -> data, 0, item.new_url -> len, false);
         if (i + 1 == redicecting_array_len) {
             render_buf = ngx_create_temp_buf(r -> pool, html -> len - item.end);
-            render_buf -> pos    = html -> data + item.start;
+            render_buf -> pos    = html -> data + item.end;
             render_buf -> last   = html -> data + html -> len;
             render_buf -> last_buf = true;
             render_buf -> last_in_chain = true;
