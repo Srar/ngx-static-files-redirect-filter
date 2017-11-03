@@ -56,16 +56,22 @@ server {
       # 是否携带源域名 默认:on
       # static_redirect_take_src_host on;
 
+      # 是否携带源请求path 默认:off
+      # static_redirect_take_src_requesting_path on;
+
       # 源站返回的内容是否为UTF8内容 默认:on
       # static_redirect_utf8_content on;	
 
       # 是否将源域名base64编码 默认:off
-      # static_redirect_base64_src_host off;		
+      # static_redirect_base64_src_host off;	
 
-      # 是否将源url path base64编码 默认:off
+      # 是否将源请求uri base64编码 默认:off
+      # static_redirect_base64_src_requesting_path off;		
+
+      # 是否将重写的资源uri base64编码 默认:off
       # static_redirect_base64_src_url  off;		
 
-      # 源域名与源url path之间的分割符号 默认: ""
+      # 源域名,源path与重写的资源uri之间的分割符号 默认: ""
       # static_redirect_split_tag "/";					
     }
 }

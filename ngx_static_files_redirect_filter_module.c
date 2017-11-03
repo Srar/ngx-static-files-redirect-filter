@@ -88,11 +88,27 @@ static ngx_command_t commands[] = {
         NULL,
     },
     {
+        ngx_string("static_redirect_take_src_requesting_path"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_static_redicect_filter_config, take_requesting_path),
+        NULL,
+    },
+    {
         ngx_string("static_redirect_base64_src_host"),
         NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
         ngx_conf_set_flag_slot,
         NGX_HTTP_LOC_CONF_OFFSET,
         offsetof(ngx_static_redicect_filter_config, base64_src_host),
+        NULL,
+    },
+    {
+        ngx_string("static_redirect_base64_src_requesting_path"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_HTTP_LMT_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_static_redicect_filter_config, base64_requesting_path),
         NULL,
     },
     {
@@ -135,14 +151,16 @@ static void* on_config_struct_created(ngx_conf_t *config) {
     if(cf == NULL) {
         return NULL;
     }
-    cf -> enable               = NGX_CONF_UNSET;
-    cf -> utf8_content         = NGX_CONF_UNSET;
-    cf -> take_src_host        = NGX_CONF_UNSET;
-    cf -> base64_src_host      = NGX_CONF_UNSET;
-    cf -> base64_src_url       = NGX_CONF_UNSET;
-    cf -> ramdom_domain_minmum = NGX_CONF_UNSET;
-    cf -> ramdom_domain_maxmum = NGX_CONF_UNSET;
-    cf -> buffer_size_limit    = NGX_CONF_UNSET;
+    cf -> enable                 = NGX_CONF_UNSET;
+    cf -> utf8_content           = NGX_CONF_UNSET;
+    cf -> take_src_host          = NGX_CONF_UNSET;
+    cf -> take_requesting_path   = NGX_CONF_UNSET;
+    cf -> base64_src_host        = NGX_CONF_UNSET;
+    cf -> base64_src_url         = NGX_CONF_UNSET;
+    cf -> base64_requesting_path = NGX_CONF_UNSET;
+    cf -> ramdom_domain_minmum   = NGX_CONF_UNSET;
+    cf -> ramdom_domain_maxmum   = NGX_CONF_UNSET;
+    cf -> buffer_size_limit      = NGX_CONF_UNSET;
     return cf;
 }
 
@@ -154,8 +172,10 @@ static char* on_config_marged(ngx_conf_t *config, void* parent, void* child) {
     ngx_conf_merge_str_value(c -> split_tag, p -> split_tag, "");
     ngx_conf_merge_value(c -> enable, p -> enable, -1);
     ngx_conf_merge_value(c -> take_src_host, p -> take_src_host, 1);
+    ngx_conf_merge_value(c -> take_requesting_path, p -> take_requesting_path, -1);
     ngx_conf_merge_value(c -> base64_src_host, p -> base64_src_host, -1);
     ngx_conf_merge_value(c -> base64_src_url, p -> base64_src_url, -1);
+    ngx_conf_merge_value(c -> base64_requesting_path, p -> base64_requesting_path, -1);
     ngx_conf_merge_value(c -> ramdom_domain_minmum, p -> ramdom_domain_minmum, 0);
     ngx_conf_merge_value(c -> ramdom_domain_maxmum, p -> ramdom_domain_maxmum, 3);
     ngx_conf_merge_value(c -> buffer_size_limit, p -> buffer_size_limit, -1);

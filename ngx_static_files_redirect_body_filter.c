@@ -97,6 +97,20 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
 
         url = ngx_append(r -> pool, url, &config -> split_tag);
 
+        if(config -> take_requesting_path == 1) {
+            ngx_str_t *request_uri = NULL;
+            if (config -> base64_requesting_path == 1) {
+                request_uri = ngx_palloc(r -> pool, sizeof(ngx_str_t));
+                request_uri -> len  = 0;
+                request_uri -> data = ngx_palloc(r -> pool, ngx_base64_encoded_length(uri -> len)); 
+                ngx_encode_base64url(request_uri, uri); 
+            } else {
+                request_uri = uri;
+            }
+            url = ngx_append(r -> pool, url, request_uri);
+            url = ngx_append(r -> pool, url, &config -> split_tag);
+        }
+
         if (config -> base64_src_url == 1) {
             ngx_str_t * base64_url = ngx_palloc(r -> pool, sizeof(ngx_str_t));
             base64_url -> len  = 0;
