@@ -65,6 +65,7 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
 
     ngx_static_redicect_regex_search_result_t *tags_array = regex_search(r -> pool, config -> html_regex -> regex, html);
     redicecting_array = ngx_palloc(r -> pool, sizeof(ngx_static_redicect_render_item) * tags_array -> len);
+
     for (int i = 0; i < tags_array -> len; i++) {
         ngx_static_redicect_regex_search_result *tag = &tags_array -> array[i];    
         ngx_static_redicect_regex_search_result *property_url = search_html_tag_property(r -> pool, tag -> str, create_ngx_string(r -> pool, "src"));
@@ -131,6 +132,10 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     }
     // printf("tags: %ld after tags: %ld\n", tags_array -> len, redicecting_array_len); 
 
+    if(redicecting_array_len == 0) {
+        return next(r, context -> html_chain);
+    }
+    
     ngx_int_t   render_offset = 0;
     ngx_buf_t   *render_buf   = NULL; 
     ngx_chain_t *render_chain = ngx_alloc_chain_link(r -> pool);
