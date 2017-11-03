@@ -9,14 +9,16 @@
 
 ngx_int_t char_indexOf(ngx_str_t* str, char c, ngx_int_t offset) {
     if (offset < 0) return -1;
-    for(ngx_int_t i = offset; i < (ngx_int_t)str -> len; i++) {
+    ngx_int_t i;
+    for(i = offset; i < (ngx_int_t)str -> len; i++) {
         if (str -> data[i] == c) return i;
     }
     return -1;
 }
 
 ngx_int_t char_last_indexOf(ngx_str_t* str, char c) {
-    for(ngx_int_t i = str -> len - 1; i >= 0 ; i--) {
+    ngx_int_t i;
+    for(i = str -> len - 1; i >= 0 ; i--) {
         if (str -> data[i] == c) return i;
     }
     return -1;
@@ -32,9 +34,9 @@ void calculate_str_len(ngx_str_t *str) {
     str -> len = ngx_strlen(str -> data);
 }
 
-ngx_str_t* redirect_static_file(ngx_pool_t *pool, bool https, ngx_str_t *host, ngx_str_t *path, ngx_str_t *tag_url) {
-    bool is_front_http  = false;
-    bool is_front_https = false;
+ngx_str_t* redirect_static_file(ngx_pool_t *pool, ngx_flag_t https, ngx_str_t *host, ngx_str_t *path, ngx_str_t *tag_url) {
+    ngx_flag_t is_front_http  = 0;
+    ngx_flag_t is_front_https = 0;
     char* front_http = ngx_strstr(tag_url -> data, "http://");
     char* front_https = ngx_strstr(tag_url -> data, "https://");
     is_front_http = front_http != NULL && front_http == (char*)tag_url -> data;
@@ -63,7 +65,7 @@ ngx_str_t* redirect_static_file(ngx_pool_t *pool, bool https, ngx_str_t *host, n
     // memcpy((char*)new_url + offset, rhost -> data, rhost -> len);
     // offset += rhost -> len;
 
-    if (is_front_http == false && is_front_https == false) {
+    if (is_front_http == 0 && is_front_https == 0) {
         if (tag_url -> data[0] != '/') {
             memcpy((char*)new_url + offset, parsed_path -> data, parsed_path -> len);
             offset += parsed_path -> len;
@@ -103,8 +105,9 @@ ngx_str_t* redirect_static_file(ngx_pool_t *pool, bool https, ngx_str_t *host, n
     }
 
     if (is_front_http || is_front_https) {
+        ngx_int_t i;
         ngx_int_t limit_flags[3] = {0, 0, 0};
-        for(ngx_int_t i = 0; i < (ngx_int_t)tag_url -> len; i++) {
+        for(i = 0; i < (ngx_int_t)tag_url -> len; i++) {
             if (tag_url -> data[i] != '/') continue;
             if (limit_flags[0] == 0) {
                 limit_flags[0] = i;
