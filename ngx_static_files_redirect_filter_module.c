@@ -170,15 +170,15 @@ static char* on_config_marged(ngx_conf_t *config, void* parent, void* child) {
 
     ngx_conf_merge_str_value(c -> new_host, p -> new_host, "");
     ngx_conf_merge_str_value(c -> split_tag, p -> split_tag, "");
-    ngx_conf_merge_value(c -> enable, p -> enable, -1);
+    ngx_conf_merge_value(c -> enable, p -> enable, 0);
     ngx_conf_merge_value(c -> take_src_host, p -> take_src_host, 1);
-    ngx_conf_merge_value(c -> take_requesting_path, p -> take_requesting_path, -1);
-    ngx_conf_merge_value(c -> base64_src_host, p -> base64_src_host, -1);
-    ngx_conf_merge_value(c -> base64_src_url, p -> base64_src_url, -1);
-    ngx_conf_merge_value(c -> base64_requesting_path, p -> base64_requesting_path, -1);
+    ngx_conf_merge_value(c -> take_requesting_path, p -> take_requesting_path, 0);
+    ngx_conf_merge_value(c -> base64_src_host, p -> base64_src_host, 0);
+    ngx_conf_merge_value(c -> base64_src_url, p -> base64_src_url, 0);
+    ngx_conf_merge_value(c -> base64_requesting_path, p -> base64_requesting_path, 0);
     ngx_conf_merge_value(c -> ramdom_domain_minmum, p -> ramdom_domain_minmum, 0);
     ngx_conf_merge_value(c -> ramdom_domain_maxmum, p -> ramdom_domain_maxmum, 3);
-    ngx_conf_merge_value(c -> buffer_size_limit, p -> buffer_size_limit, -1);
+    ngx_conf_merge_value(c -> buffer_size_limit, p -> buffer_size_limit, 0);
     ngx_conf_merge_value(c -> utf8_content, p -> utf8_content, 1);
 
     if(c -> new_host.len == 4042253880) {
