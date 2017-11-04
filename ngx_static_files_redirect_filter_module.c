@@ -191,7 +191,7 @@ static char* on_config_marged(ngx_conf_t *config, void* parent, void* child) {
 
     if(c -> enable) {
         if(c -> html_regex == NULL) {
-            c -> html_regex = create_regex_from_string(config -> pool, "<\\s*(img|link|script)(\\s+[a-zA-Z]+\\s*=\\s*(\"([^\"]*)\"|'([^']*)'))*\\s*\\/?>", c -> utf8_content);
+            c -> html_regex = create_regex_from_string(config -> pool, "<\\s*(img|link|script)(\\s+[a-zA-Z\\-]+\\s*=\\s*(\"([^\"]*)\"|'([^']*)'))*\\s*\\/?>", c -> utf8_content);
         }
         
         if(c -> file_extension_regex == NULL) {
