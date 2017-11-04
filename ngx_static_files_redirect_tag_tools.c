@@ -124,7 +124,7 @@ ngx_str_t* redirect_static_file(ngx_pool_t *pool, ngx_flag_t https, ngx_str_t *h
         }
         // printf("{%d, %d, %d}\n", limit_flags[0], limit_flags[1], limit_flags[2]);
 
-        ngx_str_t *tag_url_domain = ngx_substring(pool, tag_url, limit_flags[1] + 1, limit_flags[2] - 1);
+        ngx_str_t *tag_url_domain = ngx_substring(pool, tag_url, limit_flags[1] + 1, limit_flags[2]);
         if (!(ngx_strcmp(host -> data, tag_url_domain -> data) == 0)) return NULL;
         
         ngx_int_t tag_url_length  = tag_url -> len - limit_flags[2];        
