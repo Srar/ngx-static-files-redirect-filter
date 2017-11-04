@@ -146,10 +146,14 @@ ngx_static_redicect_regex_search_result* search_html_tag_property(ngx_pool_t* po
     // printf("str: %s property_offset: %d\n", str -> data, property_offset);
     
     ngx_int_t open_flag_offset = char_indexOf(str, '"', property_offset);
-    if (open_flag_offset == -1) return NULL;
-    
     ngx_int_t close_flag_offset = char_indexOf(str, '"', open_flag_offset + 1);
-    if (close_flag_offset == -1) return NULL;
+
+    if(open_flag_offset == -1 && close_flag_offset == -1) {
+        open_flag_offset = char_indexOf(str, '\'', property_offset);
+        close_flag_offset = char_indexOf(str, '\'', open_flag_offset + 1);
+    }
+
+    if(open_flag_offset == -1 || close_flag_offset == -1) return NULL;
 
     // printf("%s\n", str -> data);
     // printf("property offset: %d open flag offset: %d close flag offset: %d\n", property_offset, open_flag_offset, close_flag_offset);
