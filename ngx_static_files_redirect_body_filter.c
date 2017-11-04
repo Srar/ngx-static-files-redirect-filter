@@ -62,6 +62,18 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     /* 用户请求的uri */
     ngx_str_t *uri  = create_ngx_string(r -> pool, substring(r -> pool, (char*)r -> uri_start, 0, (int)(r -> uri_end - r -> uri_start)));
 
+    ngx_int_t args_offset = -1;
+    for(i = 0; i < (ngx_int_t)uri -> len; i++){
+        if(uri -> data[i] == '?') {
+            args_offset = i;
+            break;
+        }
+    }
+
+    if(args_offset != -1) {
+        uri = ngx_substring(r -> pool, uri, 0, args_offset);
+    }
+
     /* 待重新拼接的html tags */
     ngx_int_t redicecting_array_len = 0;
     ngx_static_redicect_render_item* redicecting_array = NULL;
