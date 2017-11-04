@@ -57,8 +57,9 @@ ngx_str_t* link_chains(ngx_pool_t* pool, ngx_chain_t *chain) {
     str -> len       = get_size_of_chain(chain);
     str -> data      = ngx_palloc(pool, str -> len + 1);  
     do {
-        int buffer_size = ngx_buf_size(chain -> buf);
-        for(int i = 0; i < buffer_size; i++) {
+        ngx_int_t buffer_size = ngx_buf_size(chain -> buf);
+        ngx_int_t i;
+        for(i = 0; i < buffer_size; i++) {
             str -> data[offset] = chain -> buf -> pos[i];
             offset++;
         }
@@ -121,11 +122,12 @@ ngx_static_redicect_regex_search_result_t* regex_search(ngx_pool_t* pool, ngx_re
         return response;
     }
     
-    int to_array_counter = 0;
+    ngx_int_t to_array_counter = 0;
     ngx_list_part_t *elements_part = &elements_list -> part;
     do {
         ngx_static_redicect_regex_search_result* elts = elements_part -> elts;
-        for(int i = 0; i < (int)elements_part -> nelts; i++) {
+        ngx_int_t i;
+        for(i = 0; i < (ngx_int_t)elements_part -> nelts; i++) {
             elements[to_array_counter] = elts[i];
             to_array_counter++;
         } 
@@ -203,7 +205,7 @@ ngx_str_t* ngx_copy_str(ngx_pool_t *pool, ngx_str_t* src) {
 
 void add_str_to_last_of_chain(ngx_pool_t *pool, ngx_chain_t *chain, char* str, ngx_int_t start, ngx_int_t end, ngx_flag_t last) {
     ngx_buf_t *buffer = ngx_create_temp_buf(pool, end - start);
-    buffer -> memory        = true;
+    buffer -> memory        = 1;
     buffer -> pos           = (u_char*)str + start;
     buffer -> last          = (u_char*)str + start + end;
     buffer -> last_buf      = last;
@@ -218,7 +220,7 @@ void add_buf_to_last_of_chain(ngx_pool_t *pool, ngx_chain_t *chain, ngx_buf_t *b
         return;
     }
 
-    while(true) {
+    while(1) {
         if (c -> next == NULL) break;
         c = c -> next;
     }

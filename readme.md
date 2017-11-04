@@ -79,4 +79,4 @@ server {
 
 ## 配套转发
 
-填坑中...
+* [ngx-static-files-redirect-filter-proxy](https://github.com/Srar/ngx-static-files-redirect-filter-proxy): LRU内存缓存, 自动转换WebP, CSS内资源自动重写.

@@ -22,7 +22,8 @@ ngx_str_t *ramdom_host(ngx_pool_t *pool, ngx_str_t *host, ngx_int_t min, ngx_int
     new_host -> data = ngx_palloc(pool, new_host -> len + 1);
     ngx_memcpy(new_host -> data, host -> data, new_host -> len);
     new_host -> data[new_host -> len] = '\0';
-    for (size_t i = 0; i < new_host -> len; i++) {
+    size_t i;
+    for (i = 0; i < new_host -> len; i++) {
         if (new_host -> data[i] == '$') {
             new_host -> data[i] = rand() % ((48 + max) + 1 - (48 + min)) + (48 + min);
         }
@@ -31,6 +32,8 @@ ngx_str_t *ramdom_host(ngx_pool_t *pool, ngx_str_t *host, ngx_int_t min, ngx_int
 }
 
 ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *in, ngx_int_t (*next)(ngx_http_request_t *r, ngx_chain_t *in)) {
+
+    ngx_int_t i;
 
     // clock_t begin = clock();
     
@@ -66,7 +69,7 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     ngx_static_redicect_regex_search_result_t *tags_array = regex_search(r -> pool, config -> html_regex -> regex, html);
     redicecting_array = ngx_palloc(r -> pool, sizeof(ngx_static_redicect_render_item) * tags_array -> len);
 
-    for (int i = 0; i < tags_array -> len; i++) {
+    for (i = 0; i < tags_array -> len; i++) {
         ngx_static_redicect_regex_search_result *tag = &tags_array -> array[i];    
         ngx_static_redicect_regex_search_result *property_url = search_html_tag_property(r -> pool, tag -> str, create_ngx_string(r -> pool, "src"));
         if (property_url == NULL) 
@@ -142,20 +145,20 @@ ngx_int_t body_filter(ngx_module_t module, ngx_http_request_t *r, ngx_chain_t *i
     render_chain -> buf  = NULL;
     render_chain -> next = NULL;
 
-    for (ngx_int_t i = 0; i < redicecting_array_len; i++) {
+    for (i = 0; i < redicecting_array_len; i++) {
         ngx_static_redicect_render_item item = redicecting_array[i];
         render_buf = ngx_create_temp_buf(r -> pool, item.start - render_offset);
         render_buf -> pos    = html -> data + render_offset;
         render_buf -> last   = html -> data + item.start;
         add_buf_to_last_of_chain(r -> pool, render_chain, render_buf);
         render_offset = item.end;
-        add_str_to_last_of_chain(r -> pool, render_chain, (char*)item.new_url -> data, 0, item.new_url -> len, false);
+        add_str_to_last_of_chain(r -> pool, render_chain, (char*)item.new_url -> data, 0, item.new_url -> len, 0);
         if (i + 1 == redicecting_array_len) {
             render_buf = ngx_create_temp_buf(r -> pool, html -> len - item.end);
             render_buf -> pos    = html -> data + item.end;
             render_buf -> last   = html -> data + html -> len;
-            render_buf -> last_buf = true;
-            render_buf -> last_in_chain = true;
+            render_buf -> last_buf = 1;
+            render_buf -> last_in_chain = 1;
             add_buf_to_last_of_chain(r -> pool, render_chain, render_buf);
         }
     }
